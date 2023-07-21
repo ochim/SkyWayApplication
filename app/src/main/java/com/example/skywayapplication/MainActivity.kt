@@ -122,9 +122,19 @@ class MainActivity : ComponentActivity() {
                     .show()
             }
 
-            // ハンドラ
-            room?.onStreamPublishedHandler = {
-                // このRoom内で誰かがPublishするたびに実行される部分
+            // 入室時に他のメンバーのStreamを購読する
+            room?.publications?.forEach {
+                if (it.publisher?.id == localRoomMember?.id) return@forEach
+                subscribe(it)
+            }
+
+            // 誰かがStreamを公開したときに購読する
+            room?.onStreamPublishedHandler = Any@{
+                Log.d("room", "onStreamPublished: ${it.id}")
+                if (it.publisher?.id == localRoomMember?.id) {
+                    return@Any
+                }
+                subscribe(it)
             }
 
             // 映像、音声のPublish
